@@ -28,14 +28,29 @@ st.set_page_config(
 
 # ---------------- LLM CLIENT ----------------
 
+
 @st.cache_resource
 def get_client():
-    api_key = os.getenv("GROQ_API_KEY")
+    api_key = None
+
+    # First, check Streamlit Cloud secrets
+    try:
+        api_key = st.secrets.get("GROQ_API_KEY")
+    except Exception:
+        pass
+
+    # If unavailable, check the local .env file
+    if not api_key:
+        api_key = os.getenv("GROQ_API_KEY")
+
     if not api_key:
         raise ValueError(
-            "GROQ_API_KEY is missing. Add it to the .env file in the project folder."
+            "GROQ_API_KEY is missing. Configure it in Streamlit Secrets "
+            "or your local .env file."
         )
+
     return Groq(api_key=api_key)
+
 
 
 # ---------------- PYDANTIC SCHEMAS ----------------
